@@ -1,0 +1,18 @@
+#ifndef FRUSTRUM_@includeGuardName@
+#define FRUSTRUM_@includeGuardName@
+
+#include <cstdint>
+
+// Pre-declaration
+// class @typeName@;
+
+namespace frs {
+    template<>
+    struct type_traits<@typeName@>
+    {
+        static constexpr std::size_t size      = @typeSize@;
+        static constexpr std::size_t alignment = @typeAlignment@;
+    };
+}
+
+#endif // FRUSTRUM_@includeGuardName@

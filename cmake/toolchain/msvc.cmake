@@ -1,0 +1,16 @@
+set(CMAKE_VS_WINRT_BY_DEFAULT OFF)
+set(CMAKE_VS_SDK_INCLUDE_DIRECTORIES "")
+#set(CMAKE_VS_SDK_EXECUTABLE_DIRECTORIES "")
+set(CMAKE_VS_SDK_SOURCE_DIRECTORIES "")
+set(CMAKE_VS_SDK_EXCLUDE_DIRECTORIES "")
+#set(CMAKE_VS_SDK_LIBRARY_DIRECTORIES "")
+#set(CMAKE_VS_SDK_LIBRARY_WINRT_DIRECTORIES "")
+set(CMAKE_VS_SDK_REFERENCE_DIRECTORIES "")
+
+# TODO: find windows libs by hand
+
+set(CMAKE_VS_GLOBALS
+        "DefaultLanguage=en-US"
+        "MinimumVisualStudioVersion=17.0"
+        "ExternalIncludePath="
+)

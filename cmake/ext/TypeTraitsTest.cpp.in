@@ -1,0 +1,7 @@
+@headers@
+#include <iostream>
+
+int main() {
+    std::cout << sizeof(@typeName@) << std::endl;
+    std::cout << alignof(@typeName@) << std::endl;
+}

@@ -1,0 +1,38 @@
+PROJECT_NAME           = "Frustrum Engine"
+PROJECT_NUMBER         = 1.0
+PROJECT_BRIEF          = "Frustrum Game Engine"
+
+INPUT                  = engine
+RECURSIVE              = YES
+FILE_PATTERNS          = *.c *.h *.cpp *.hpp *.i *.inl
+
+OUTPUT_DIRECTORY       = docs
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_PACKAGE        = YES
+EXTRACT_STATIC         = YES
+
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = YES
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+
+GENERATE_LATEX         = NO
+LATEX_OUTPUT           = latex
+ENABLE_PREPROCESSING   = YES
+
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = NO
+
+HAVE_DOT               = NO
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
+
+QUIET                  = NO
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+
+INPUT += docs/Modules.dox

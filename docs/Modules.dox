@@ -1,0 +1,14 @@
+\page architecture_modules Modules
+\defgroup architecture Architecture
+\ingroup architecture
+
+// TODO: format
+- Each modules has the following structure:
+<module_name>
+    /include - public headers directory
+    /private_include - private headers directory
+    /src - sources directory
+    CMakeLists.txt - build dir
+
+Symlinks are created in build dir so include paths are prefixed with 'frustrum/<module_name>
+Module name can be omitted if flags in CMake are specified

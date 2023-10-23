@@ -1,0 +1,5 @@
+#ifdef FRS_@macroNamePrefix@EXPORT
+#	define FRS_@macroNamePrefix@EXPORT_C extern "C" FRS_@macroNamePrefix@EXPORT
+#else
+#	define FRS_@macroNamePrefix@EXPORT_C
+#endif
