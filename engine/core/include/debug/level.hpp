@@ -2,6 +2,9 @@
 #define FRUSTRUM_LEVEL
 
 #include "frustrum/core.hpp"
+#include "frustrum/frustrum_core_export.hpp"
+
+#include "frustrum/frsdef.hpp"
 
 #include <cstdint>
 
@@ -43,6 +46,26 @@ namespace frs::debug
         critical = ::frs::debug::LEVEL_CRITICAL,
     };
 
+    inline string to_string(level level)
+    {
+        switch (level)
+        {
+        case level::trace:
+            return L"trace";
+        case level::debug:
+            return L"debug";
+        case level::info:
+            return L"info";
+        case level::warn:
+            return L"warn";
+        case level::error:
+            return L"error";
+        case level::critical:
+            return L"critical";
+        default:
+            return L"NULL";
+        }
+    }
 } // namespace frs::debug
 
 #endif //FRUSTRUM_LEVEL

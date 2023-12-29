@@ -3,47 +3,64 @@
 
 #include "frustrum/pimpl.hpp"
 
+#include <new>
+#include <type_traits>
+#include <utility>
+#include <xmemory>
+#include <xstddef>
+#include <xutility>
+
+
 namespace frs
 {
     // TODO: implement custom allocation
-    template<typename T, type_traits_typename ImplTraits>
-    pimpl<T, ImplTraits>::pimpl() : _pimpl {}
+    template<pimpl_suitable_typename WrapperT,
+            pimpl_suitable_implementation_typename T,
+             type_traits_typename ImplTraits>
+    constexpr pimpl<WrapperT, T, ImplTraits>::pimpl()
+        : _pimpl {}
     {
-        // TODO: check if type_traits are valid
-        ::new(::std::addressof(_pimpl)) T();
+        ::std::construct_at(
+                reinterpret_cast<T*>(&_pimpl));
     }
 
-    template<typename T, type_traits_typename ImplTraits>
-    template<typename ...Args>
-    pimpl<T, ImplTraits>::pimpl(Args&& ...args)
-            : _pimpl {}
+    template<pimpl_suitable_typename WrapperT,
+            pimpl_suitable_implementation_typename T,
+             type_traits_typename ImplTraits>
+    template<typename... Args>
+    constexpr pimpl<WrapperT, T, ImplTraits>::pimpl(Args&&... args)
+        : _pimpl {}
     {
-        // TODO: check if type_traits are valid
-        ::new(::std::addressof(_pimpl)) T(std::forward<Args>()...);
+        ::std::construct_at(
+                reinterpret_cast<T*>(&_pimpl),
+                std::forward<Args>(args)...);
     }
 
-    template<typename T, type_traits_typename ImplTraits>
-    pimpl<T, ImplTraits>::~pimpl()
+    template<pimpl_suitable_typename WrapperT,
+            pimpl_suitable_implementation_typename T,
+             type_traits_typename ImplTraits>
+    constexpr pimpl<WrapperT, T, ImplTraits>::~pimpl()
     {
         ::std::destroy_at(
                 std::launder(
-                        reinterpret_cast<T*>(std::addressof(_pimpl)
-                        )
-                )
-        );
+                        reinterpret_cast<T*>(&_pimpl)));
     }
 
-    template<typename T, type_traits_typename ImplTraits>
-    T* pimpl<T, ImplTraits>::operator->()
+    template<pimpl_suitable_typename WrapperT,
+            pimpl_suitable_implementation_typename T,
+             type_traits_typename ImplTraits>
+    constexpr T* pimpl<WrapperT, T, ImplTraits>::operator->() noexcept
     {
         return reinterpret_cast<T*>(&_pimpl);
     }
 
-    template<typename T, type_traits_typename ImplTraits>
-    T& pimpl<T, ImplTraits>::operator*()
+    template<pimpl_suitable_typename WrapperT, pimpl_suitable_implementation_typename T, type_traits_typename ImplTraits>
+    constexpr T& pimpl<WrapperT, T, ImplTraits>::operator*() const noexcept
     {
-        return reinterpret_cast<T*>(&_pimpl);
+        return *std::launder(
+                const_cast<T*>(
+                        reinterpret_cast<const T*>(&_pimpl)));
     }
-}
+} // namespace frs
 
 #endif //FRUSTRUM_PIMPL_INL

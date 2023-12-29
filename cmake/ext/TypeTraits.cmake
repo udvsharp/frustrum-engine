@@ -1,5 +1,7 @@
 include(CMakeParseArguments)
 
+# TODO: type traits files can't include other type traits file - circular dependency
+
 function (__generate_type_traits_test_file outFile type typeNoPrefix includeStatements)
     set(typeTraitsFileIn "${CMAKE_SOURCE_DIR}/cmake/ext/TypeTraitsTest.cpp.in")
     set(typeTraitsFile "${CMAKE_BINARY_DIR}/ext/TypeTraitsTest_${typeNoPrefix}.cpp")
@@ -91,10 +93,30 @@ function (generate_type_traits typeName typeNameNoPrefix)
     set(headerName "${GTT_HEADER_NAME}")
     set(genDir "${GTT_GEN_DIR}")
 
-    # TODO: need to re-generate type traits after any changes to dependent classes
-    # TODO: should be build target too
     __get_type_traits("${typeName}" "${typeNameNoPrefix}" "${includeStatements}" "${additionalIncludeDirs}")
     __generate_type_traits_header("${typeName}" "${typeNameNoPrefix}" "${includeGuardName}" "${genDir}" "${headerName}")
+
+    set(buildTimeCmakeScriptTemplate "${CMAKE_SOURCE_DIR}/cmake/ext/RunGenerateTypeTraits.cmake.in")
+    set(buildTimeCmakeScript "${CMAKE_BINARY_DIR}/cmake_generated/RunGenerateTypeTraits.${typeNameNoPrefix}.cmake")
+    configure_file(
+            "${buildTimeCmakeScriptTemplate}"
+            "${buildTimeCmakeScript}" #< TODO: generated dir
+            @ONLY
+    )
+
+    # TODO: not sure how to do it
+    set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${buildTimeCmakeScriptTemplate}")
+
+    # TODO: need to re-generate type traits after any changes to dependent classes
+    add_custom_command(
+            OUTPUT "${genDir}/${headerName}.hpp"
+            COMMAND ${CMAKE_COMMAND} -P "${buildTimeCmakeScript}"
+            COMMENT "Updating type traits for ${typeName}..."
+            DEPENDS "${GTT_HEADERS}"
+                    "${buildTimeCmakeScript}"
+                    "${buildTimeCmakeScriptTemplate}"
+            VERBATIM
+    )
 
     message(STATUS "Generated type traits: ${typeName}")
 endfunction ()

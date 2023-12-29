@@ -4,24 +4,23 @@
 #include <memory>
 #include <thread>
 
+#include "frustrum/application.hpp"
+#include "frustrum/platform/win/win_application.hpp"
 #include "frustrum/window.hpp"
 #include "frustrum/platform/win/win_window.hpp"
 
-HINSTANCE g_hInstance = nullptr;
-
-namespace frs {
-
-}
+extern std::shared_ptr<::frs::application> g_app_instance;
 
 // Use for ref https://learn.microsoft.com/en-us/windows/win32/dlls/dllmain
-// https://ikrima.dev/dev-notes/cpp/crt-init/
+//             https://ikrima.dev/dev-notes/cpp/crt-init/
 BOOL DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved) {
     if (hinstDLL == nullptr) {
         return FALSE;
     }
 
-    // frs::Engine::Init(hinstDLL);
-    g_hInstance = hinstDLL;
+    // frs::engine::init(hinstDLL);
+    g_app_instance = ::frs::application::make();
+    g_app_instance->platform().init(hinstDLL);
 
     std::cout << std::this_thread::get_id() << std::endl;
 

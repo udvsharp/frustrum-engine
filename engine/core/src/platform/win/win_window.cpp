@@ -5,114 +5,170 @@
 
 #include <Windows.h>
 
+#include "frustrum/application.hpp"
 #include "frustrum/debug.hpp"
 
-extern HINSTANCE g_hInstance;
+#include "frustrum/platform/win/win_application.hpp"
 
-namespace
+namespace frs
 {
+    window_data window_data::make_default()
+    {
+        return {
+                .type   = window_type::general,
+                .x      = CW_USEDEFAULT,
+                .y      = CW_USEDEFAULT,
+                .width  = CW_USEDEFAULT,
+                .height = CW_USEDEFAULT,
 
-}
+                .has_sizing_frame  = true,
+                .has_close_btn     = true,
+                .supports_maximise = true,
+                .supports_minimise = true,
+                .is_always_topmost = false,
+
+                .should_preserve_aspect_ratio = false,
+
+                .has_os_window_border  = true,
+                .supports_transparency = false,
+                .accepts_input         = true,
+
+                .title = L"Frustum Engine Window"};
+    }
+} // namespace frs
 
 namespace frs::platform::win
 {
-    LRESULT windows_window::WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-    {
-        // TODO: get custom pointer from hwnd
-        switch (uMsg)
-        {
-        case WM_CLOSE:
-            if (MessageBox(hwnd, L"Really quit?", L"My application", MB_OKCANCEL) == IDOK)
-            {
-                DestroyWindow(hwnd);
-            }
-            // Else: User canceled. Do nothing.
-            return 0;
-        case WM_PAINT: {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hwnd, &ps);
-
-            // All painting occurs here, between BeginPaint and EndPaint.
-
-            FillRect(hdc, &ps.rcPaint, (HBRUSH)(COLOR_WINDOW + 1));
-
-            EndPaint(hwnd, &ps);
-            return 0;
-        }
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            return 0;
-        default:
-            return DefWindowProc(hwnd, uMsg, wParam, lParam);
-        }
-    }
-
     windows_window::windows_window()
-        : _nativeHandle {}
+        : _hwnd {}
     {
     }
 
-    HWND windows_window::nativeHandle() const
+    windows_window::~windows_window()
     {
-        return _nativeHandle;
+        // TODO: ensure that _hwnd is invalid (should be destroyed earlier)
+        // DestroyWindow(_hwnd);
     }
 
-    bool windows_window::init()
+    HWND windows_window::hwnd() const
     {
-        if (g_hInstance == nullptr)
+        return _hwnd;
+    }
+
+    windows_window::style_t windows_window::style_from(const window_data& data)
+    {
+        style_t style = 0;
+
+        // TODO: maybe can be simplified?
+        if (data.has_os_window_border)
         {
-            return false;
+            style |= WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION;
+
+            if (data.type == window_type::general)
+            {
+                if (data.supports_minimise)
+                {
+                    style |= WS_MINIMIZEBOX;
+                }
+
+                if (data.supports_maximise)
+                {
+                    style |= WS_MAXIMIZEBOX;
+                }
+
+                if (data.has_sizing_frame)
+                {
+                    style |= WS_THICKFRAME;
+                }
+                else
+                {
+                    style |= WS_BORDER;
+                }
+            }
+            else
+            {
+                style |= WS_POPUP | WS_BORDER;
+            }
+        }
+        else
+        {
+            style |= WS_POPUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
         }
 
+        return style;
+    }
+
+    windows_window::ex_style_t windows_window::ex_style_from(const window_data& data)
+    {
+        ex_style_t exStyle = 0;
+
+        if (data.has_os_window_border)
+        {
+            exStyle |= WS_EX_APPWINDOW;
+        }
+        else
+        {
+            exStyle |= WS_EX_WINDOWEDGE;
+        }
+
+        if (data.supports_transparency)
+        {
+            exStyle |= WS_EX_LAYERED;
+            // TODO: WS_EX_COMPOSITED if PerPixel transparency
+        }
+
+        if (data.is_always_topmost)
+        {
+            exStyle |= WS_EX_TOPMOST;
+        }
+
+        if (!data.accepts_input)
+        {
+            exStyle |= WS_EX_TRANSPARENT;
+        }
+
+        return exStyle;
+    }
+
+    std::tuple<windows_window::style_t, windows_window::ex_style_t> windows_window::styles_from(const window_data& data)
+    {
+        style_t style      = style_from(data);
+        ex_style_t exStyle = ex_style_from(data);
+
+        return std::make_tuple(style, exStyle);
+    }
+
+    bool windows_window::init(
+            const ::frs::shared_ptr<::frs::application>& owningApplication,
+            window_data data,
+            const ::frs::shared_ptr<::frs::window>& parentWindow)
+    {
         // TODO: get styles from config
-        int frameX      = CW_USEDEFAULT,
-            frameY      = CW_USEDEFAULT,
-            frameWidth  = CW_USEDEFAULT,
-            frameHeight = CW_USEDEFAULT;
 
-        DWORD style = WS_OVERLAPPEDWINDOW;
-        // TODO: conditional
-        DWORD exStyle = 0;
-        // TODO: param
-        const wchar_t* wideTitle = L"Test window name";
+        const auto [style, ex_style] = styles_from(data);
+        const wchar_t* wide_title    = data.title.data();
 
-        WNDCLASSEXW wc   = {.cbSize = sizeof(wc)};
-        wc.lpfnWndProc   = windows_window::WindowProc;
-        wc.hInstance     = g_hInstance;
-        wc.lpszClassName = L"FRS10";
-        // wc.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-        // TODO: user provided Icon
-        // wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-        // TODO: custom classname and why?
-        // TODO: store this! It's a unique created window ID
-        ATOM classId = RegisterClassEx(&wc);
+        const auto classId = owningApplication->platform().wndclass_id();
 
-        if (!classId)
-        {
-            // TODO: error
-            return false;
-        }
-
-        _nativeHandle = CreateWindowEx(
-                exStyle,
+        _hwnd = ::CreateWindowEx(
+                ex_style,
                 MAKEINTATOM(classId),
-                wideTitle,
+                wide_title,
                 style,
-                frameX, frameY,
-                frameWidth, frameHeight,
-
-                nullptr,
-                // No parent window
-                nullptr,     // No window menu
-                g_hInstance, // TODO: add instance
-                nullptr      // TODO: this is additional ptr
+                data.x, data.y,
+                data.width, data.height,
+                nullptr, // TODO: parent handling?
+                nullptr, ///< No menu
+                owningApplication->platform().instance_handle(),
+                nullptr // TODO: this is additional ptr
         );
 
-        if (_nativeHandle == nullptr)
+        if (_hwnd == nullptr)
         {
             const auto error = GetLastError();
 
-            /// Have seen that
+            // TODO: Have seen that it's helpful to write here
+            //  counts of GDI and user objects, number of handles existing in app
             FRS_DEBUG_LOG_ERROR(L"Failed to create window - handle is invalid: {}", error);
 
             // TODO: handle error codes
@@ -125,13 +181,8 @@ namespace frs::platform::win
 
     bool windows_window::show()
     {
-        BOOL showError = ShowWindow((HWND)_nativeHandle, SW_SHOWNA);
-        if (showError != 0)
-        {
-            return false;
-        }
-
-        return true;
+        BOOL showError = ShowWindow(_hwnd, SW_SHOW);
+        return showError == 0;
     }
 
 } // namespace frs::platform::win

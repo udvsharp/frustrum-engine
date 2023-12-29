@@ -1,5 +1,5 @@
-#ifndef FRS_WINDOW
-#define FRS_WINDOW
+#ifndef FRUSTRUM_WINDOW
+#define FRUSTRUM_WINDOW
 
 #include "frustrum/core.hpp"
 #include "frustrum/frustrum_core_export.hpp"
@@ -9,6 +9,7 @@
 
 #include "frustrum/frsdef.hpp"
 #include "frustrum/pimpl.hpp"
+#include "frustrum/window_data.hpp"
 
 FRS_DECLARE_PIMPL(window)
 #ifndef FRS_GENERATING
@@ -19,17 +20,25 @@ FRS_DECLARE_PIMPL(window)
 
 namespace frs
 {
+    class application;
+
     class window
     {
         using impl = FRS_PLATFORM_IMPL_NAMESPACED(window);
+
     public:
         FRS_CORE_EXPORT window();
         FRS_CORE_EXPORT ~window();
-        FRS_CORE_EXPORT bool init();
+
+        FRS_CORE_EXPORT bool init(
+                const ::frs::shared_ptr<::frs::application>& owningApplication,
+                ::frs::window_data data,
+                const ::frs::shared_ptr<::frs::window>& parentWindow = {});
         FRS_CORE_EXPORT bool show();
+
     private:
-        pimpl<impl> _pimpl;
+        ::frs::pimpl<window, impl> _pimpl;
     };
 } // namespace frs
 
-#endif //FRS_WINDOW
+#endif //FRUSTRUM_WINDOW

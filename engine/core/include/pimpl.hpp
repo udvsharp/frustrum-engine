@@ -16,39 +16,66 @@ namespace frs
     template<typename T>
     struct type_traits;
 
+    /// @brief concept to check if type traits instantiation is valid
     template<typename T>
     concept type_traits_typename =
 #ifndef FRS_GENERATING // To prevent compile errors in generated files
             requires(T type) {
                 {
-                    type.size
+                    T::size
                 } -> std::convertible_to<std::size_t>;
+                T::size >= 0;
+
                 {
-                    type.alignment
+                    T::alignment
                 } -> std::convertible_to<std::size_t>;
+                T::alignment >= 0;
             };
 #else
             true; // Condition is always satisfied
 #endif
+
+    /// @brief concept to check if implementation (inside Pimpl object) is suitable
+    template<typename T>
+    concept pimpl_suitable_implementation_typename = requires(T type) {
+        true;
+
+        // TODO: should be incomplete during GENERATING stage
+        // TODO: should have a type_traits instantiation
+    };
+
+    /// @brief concept to check if container (will have pimpl object inside) is suitable
+    template<typename T>
+    concept pimpl_suitable_typename = requires(T type) {
+        true;
+
+        // TODO: should not have constructors defined in headers(inline)
+        // Constructor should be defined in implementation file and exported
+
+        // TODO: should have no public interface usage of pimpl object
+    };
 
     /**
      * @brief  This template class provides a wrapper for PIMPL idiom implementation class.
      *         It manages lifetime of pimpl (implementation pointer) and provides a handy way to access it members.
      * @tparam T Type of implementation class.
      */
-     // TODO: maybe we can declare a concept to validate implementation?
-    template<typename T, type_traits_typename ImplTraits = type_traits<T>>
+    // TODO: maybe we can declare a concept to validate implementation?
+    template<
+            pimpl_suitable_typename WrapperT,
+            pimpl_suitable_implementation_typename T,
+            type_traits_typename ImplTraits = type_traits<T>>
     class pimpl final
     {
     public:
-        pimpl();
+        constexpr pimpl();
         template<typename... Args>
-        explicit pimpl(Args&&...);
-        ~pimpl();
+        constexpr explicit pimpl(Args&&...);
+        constexpr ~pimpl();
 
     public:
-        T* operator->();
-        T& operator*();
+        constexpr T* operator->() noexcept;
+        constexpr T& operator*() const noexcept;
 
     private:
         /// Implementation object storage (not a pointer)
@@ -121,7 +148,7 @@ namespace frs
  *        and @see FRS_DECLARE_TYPE_TRAITS(className).
  * @param className - Platform-agnostic name of the class to be used.
  */
-#define FRS_DECLARE_PIMPL(className)          \
+#define FRS_DECLARE_PIMPL(className)             \
     FRS_FORWARD_DECLARE_PLATFORM_IMPL(className) \
     FRS_DECLARE_TYPE_TRAITS(className)
 

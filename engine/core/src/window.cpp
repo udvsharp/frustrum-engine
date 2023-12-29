@@ -6,7 +6,6 @@
 
 namespace frs
 {
-
     window::window()
         : _pimpl()
     {
@@ -14,9 +13,12 @@ namespace frs
 
     window::~window() = default;
 
-    bool window::init()
+    bool window::init(
+            const ::frs::shared_ptr<::frs::application>& owningApplication,
+            ::frs::window_data data,
+            const ::frs::shared_ptr<window>& parentWindow)
     {
-        return _pimpl->init();
+        return _pimpl->init(owningApplication, std::move(data), parentWindow);
     }
 
     bool window::show()

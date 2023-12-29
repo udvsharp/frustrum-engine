@@ -15,13 +15,13 @@ project(
         LANGUAGES C CXX
 )
 
-if(NOT DEFINED FRS_MASTER_PROJECT)
-    if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+if (NOT DEFINED FRS_MASTER_PROJECT)
+    if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
         set(FRS_MASTER_PROJECT ON)
-    else()
+    else ()
         set(FRS_MASTER_PROJECT OFF)
-    endif()
-endif()
+    endif ()
+endif ()
 
 ### Options
 # Build options

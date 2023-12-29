@@ -32,7 +32,7 @@ namespace frs::debug
     {
         return fmt.get();
     }
-
+#ifndef FRS_GENERATING
     class logger
     {
         using impl = FRS_PLATFORM_IMPL_NAMESPACED(logger);
@@ -133,7 +133,7 @@ namespace frs::debug
 
         bool should_log(frs::debug::level level)
         {
-            return _level >= level;
+            return level >= _level;
         }
 
     private:
@@ -158,17 +158,19 @@ namespace frs::debug
         }
 
         /// Main log function
-        void _log_msg(frs::debug::message message);
+        void _log_msg(::frs::debug::message message);
 
     private:
-        frs::string _name;
-        frs::debug::level _level {level::info};
+        ::frs::string _name;
+        ::frs::debug::level _level {level::info};
         // TODO: sink ptr
 
         /// Platform-specific logger implementation
-        frs::pimpl<impl> _pimpl;
+        ::frs::pimpl<logger, impl> _pimpl;
     };
-
+#else // Forward declarations for generation stage
+    class logger;
+#endif
 } // namespace frs::debug
 
 #endif //FRUSTRUM_LOGGER

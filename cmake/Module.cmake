@@ -97,7 +97,7 @@ function (__frs_module_generate_export_header module binaryDir moduleShort macro
 
     # TODO: install generated header
     generate_export_header(
-            core
+            ${module}
             BASE_NAME FRS_${macroPrefix}
 
             # TODO: include dir as a property or var?
@@ -114,6 +114,12 @@ function (__frs_module_generate_export_header module binaryDir moduleShort macro
             DEFINE_NO_DEPRECATED
             CUSTOM_CONTENT_FROM_VARIABLE customContent
             #        EXPORT_FILE_NAME
+    )
+
+    add_compile_definitions(
+            ${module}
+            PRIVATE
+            FRS_${macroPrefix}_EXPORTS
     )
 
     unset(customContent)

@@ -49,7 +49,9 @@ namespace frs
     // endregion
 
     // Custom defines
-    using window_dimension_t = uint32_t;
+    using window_type_t = uint32_t;
+    using window_dimension_t = int32_t;
+    using window_position_t = int32_t;
 
     using thread_id_t = std::size_t;
 } // namespace frs
