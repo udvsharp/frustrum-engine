@@ -1,0 +1,4 @@
+include(ext/TypeTraits)
+
+__get_type_traits("@typeName@" "@typeNameNoPrefix@" "@includeStatements@" "@additionalIncludeDirs@")
+__generate_type_traits_header("@typeName@" "@typeNameNoPrefix@" "@includeGuardName@" "@genDir@" "@headerName@")

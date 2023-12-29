@@ -1,0 +1,44 @@
+include(ext/TypeTraits.cmake)
+
+if (NOT DEFINED CACHE{module})
+    message(FATAL_ERROR "Required variables not specififed!")
+endif ()
+
+if (NOT DEFINED CACHE{type})
+    message(FATAL_ERROR "Required variables not specififed!")
+endif ()
+
+if (NOT DEFINED CACHE{typeNoPrefix})
+    message(FATAL_ERROR "Required variables not specififed!")
+endif ()
+
+if (NOT DEFINED CACHE{header})
+    message(FATAL_ERROR "Required variables not specififed!")
+endif ()
+
+if (NOT DEFINED CACHE{dependencies})
+    message(FATAL_ERROR "Required variables not specififed!")
+endif ()
+
+if (NOT DEFINED CACHE{additionalIncludeDirs})
+    message(FATAL_ERROR "Required variables not specififed!")
+endif ()
+
+if (NOT DEFINED CACHE{genDir})
+    message(FATAL_ERROR "Required variables not specififed!")
+endif ()
+
+string(TOUPPER "${module}" moduleUpper)
+string(TOUPPER "${type}" typeUpper)
+string(TOUPPER "${typeNoPrefix}" typeNoPrefixUpper)
+
+generate_type_traits(
+        ${type} ${typeNoPrefix}
+        HEADERS "${header}"
+        DEPENDENCIES ${dependencies}
+        # TODO: property
+        ADDITIONAL_INCLUDE_DIRS ${additionalIncludeDirs}
+        GEN_DIR "${genDir}"
+        HEADER_NAME "${typeNoPrefix}_traits"
+        INCLUDE_GUARD_NAME "FRS_${moduleUpper}_${typeNoPrefixUpper}_TYPE_TRAITS" # TODO: get short name for module
+)
